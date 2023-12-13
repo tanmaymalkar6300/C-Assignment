@@ -1,193 +1,105 @@
 Assignment 10
 
-
 CODE
 
-
 #include <iostream>
-
-#include <stack>
-
-
 using namespace std;
 
+#define size 20 // Increase the array size to accommodate longer expressions
 
-int getOperatorPrecedence(char op) {
+class stackexp {
+    int top;
+    char stk[size];
 
-    switch (op) {
-
-    case '+':
-
-    case '-':
-
-        return 1;
-
-    case '*':
-
-    case '/':
-
-        return 2;
-
-    default:
-
-        return 0;
-
+public:
+    stackexp() {
+        top = -1;
     }
+    void push(char);
+    char pop();
+    int isfull();
+    int isempty();
+};
 
+void stackexp::push(char x) {
+    if (top < size - 1) {
+        top = top + 1;
+        stk[top] = x;
+    } else {
+        cout << "\nStack Overflow. Expression is too long.\n";
+        exit(1); // Terminate the program
+    }
 }
 
-string infixToPostfix(string exp) {
-
-    stack<char> st;
-
-    string postfixExp;
-
-
-    for (char ch : exp) {
-
-        if (isalnum(ch)) {
-
-            postfixExp += ch;
-
-        } else if (ch == '(') {
-
-            st.push(ch);
-
-        } else if (ch == ')') {
-
-            while (!st.empty() && st.top() != '(') {
-
-                postfixExp += st.top();
-
-                st.pop();
-
-            }
-
-            if (st.empty()) {
-
-                cout << "Invalid expression" << endl;
-
-                return "";
-
-            }
-
-            st.pop();
-
-        } else {
-
-            while (!st.empty() && getOperatorPrecedence(st.top()) >= getOperatorPrecedence(ch)) {
-
-                postfixExp += st.top();
-
-                st.pop();
-
-            }
-
-            st.push(ch);
-
-        }
-
+char stackexp::pop() {
+    if (top >= 0) {
+        char s = stk[top];
+        top = top - 1;
+        return s;
+    } else {
+        cout << "\nStack Underflow. Trying to pop from an empty stack.\n";
+        exit(1); // Terminate the program
     }
-
-
-    while (!st.empty()) {
-
-        postfixExp += st.top();
-
-        st.pop();
-
-    }
-
-
-    return postfixExp;
-
 }
 
-
-int evaluatePostfix(string exp) {
-
-    stack<int> st;
-
-
-    for (char ch : exp) {
-
-        if (isdigit(ch)) {
-
-            int operand = ch - '0';
-
-            st.push(operand);
-
-        } else {
-
-            int operand2 = st.top();
-
-            st.pop();
-
-            int operand1 = st.top();
-
-            st.pop();
-
-
-            int result;
-
-
-            switch (ch) {
-
-            case '+':
-
-                result = operand1 + operand2;
-
-                break;
-
-            case '-':
-
-                result = operand1 - operand2;  // Swap operand1 and operand2 for subtraction
-
-                break;
-
-            case '*':
-
-                result = operand1 * operand2;
-
-                break;
-
-            case '/':
-
-                result = operand1 / operand2;  // Swap operand1 and operand2 for division
-
-                break;
-
-            }
-
-
-            st.push(result);
-
-        }
-
-    }
-
-
-    return st.top();
-
+int stackexp::isfull() {
+    return top == size - 1;
 }
 
+int stackexp::isempty() {
+    return top == -1;
+}
 
 int main() {
+    stackexp s1;
+    char exp[size], ch;
+    int i = 0;
 
-    string infixExp = "11+4*2";
+    cout << "\n\t!! Parenthesis Checker..!!!!" << endl;
 
-    string postfixExp = infixToPostfix(infixExp);
+    cout << "\nEnter the expression to check whether it is in well form or not : ";
+    cin.getline(exp, size);
 
-    cout << "Postfix expression: " << postfixExp << endl;
+    if ((exp[0] == ')') || (exp[0] == ']') || (exp[0] == '}')) {
+        cout << "\nInvalid Expression.....\n";
+        return 0;
+    } else {
+        while (exp[i] != '\0') {
+            ch = exp[i];
+            switch (ch) {
+            case '(':
+            case '[':
+            case '{':
+                s1.push(ch);
+                break;
+            case ')':
+                if (s1.isempty() || s1.pop() != '(') {
+                    cout << "\nInvalid Expression or not in well parenthesized....\n";
+                    return 0;
+                }
+                break;
+            case ']':
+                if (s1.isempty() || s1.pop() != '[') {
+                    cout << "\nInvalid Expression or not in well parenthesized....\n";
+                    return 0;
+                }
+                break;
+            case '}':
+                if (s1.isempty() || s1.pop() != '{') {
+                    cout << "\nInvalid Expression or not in well parenthesized....\n";
+                    return 0;
+                }
+                break;
+            }
+            i = i + 1;
+        }
+    }
 
-
-    int result = evaluatePostfix(postfixExp);
-
-    cout << "Result: " << result << endl;
-
+    if (s1.isempty()) {
+        cout << "\nExpression is well parenthesized...\n";
+    } else {
+        cout << "\nInvalid Expression or not in well parenthesized....\n";
+    }
 
     return 0;
-
 }
-
-
